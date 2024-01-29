@@ -1,30 +1,31 @@
 import { getStore } from "@netlify/blobs";
-import { URLSearchParams } from 'url';
+import { URLSearchParams } from "url";
 
 export default async (req, context) => {
-    const store = getStore('frameState');
-    let rawCount = await store.get('count');
-    let count = parseInt(rawCount);
-    if (Number.isNaN(count)) count = 0;
+  const store = getStore("frameState");
+  let count = parseInt(await store.get("count"));
+  if (Number.isNaN(count)) count = 0;
 
-    if (req.method === 'POST') {
-        let data;
-        if (req.headers['content-type'] === 'application/json') {
-            // Parse JSON body
-            data = JSON.parse(req.body);
-        } else if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
-            // Parse URL-encoded body
-            data = Object.fromEntries(new URLSearchParams(req.body));
-        }
-        console.debug(data);
-        const newCount = count+1;
-        await store.set('count', newCount);
+  if (req.method === "POST") {
+    let data;
+    if (req.headers["content-type"] === "application/json") {
+      // Parse JSON body
+      data = JSON.parse(req.body);
+    } else if (
+      req.headers["content-type"] === "application/x-www-form-urlencoded"
+    ) {
+      // Parse URL-encoded body
+      data = Object.fromEntries(new URLSearchParams(req.body));
     }
+    console.debug(data);
+    const newCount = count + 1;
+    await store.set("count", newCount);
+  }
 
-    const host = process.env.URL;
-    const imagePath = `${host}/og-image?count=${count}`;
+  const host = process.env.URL;
+  const imagePath = `${host}/og-image?count=${count}`;
 
-    const html = `
+  const html = `
         <!doctype html>
         <html>
         <head>
@@ -56,16 +57,14 @@ export default async (req, context) => {
             </form>
         </body>
         </html>
-    `
-    
-    return new Response(html, 
-        {
-            status: 200,
-            headers: { 'Content-Type': 'text/html' },
-        }
-    );
-}
+    `;
+
+  return new Response(html, {
+    status: 200,
+    headers: { "Content-Type": "text/html" },
+  });
+};
 
 export const config = {
-    path: "/"
+  path: "/",
 };
